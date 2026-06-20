@@ -9,7 +9,7 @@ on:
 jobs:
   call-ops-workflow:
     # Sustituye 'tu-usuario' por el nombre de tu cuenta o asociación en GitHub
-    uses: OrganizacionDePruebaTest/asociacion-ops/.github/workflows/netlify-reusable.yml@main
+    uses: OrganizacionDePruebaTest/asociacion-ops/.github/workflows/streamlit-reusable.yml@main
     with:
       language: 'python'
       python_version: '3.13.11'
