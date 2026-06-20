@@ -1,0 +1,13 @@
+{
+  "name": "python-template",
+  "version": "1.0.0",
+  "description": "Template de Python compatible con el pipeline universal de Ops",
+  "scripts": {
+    "test": "pytest",
+    "build": "python -m build",
+    "lint": "flake8 ."
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}

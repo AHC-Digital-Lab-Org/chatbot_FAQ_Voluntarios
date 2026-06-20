@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-template"
+version = "1.0.0"
+description = "Template de Python compatible con el pipeline universal de Ops"
+readme = "README.md"
+requires-python = ">=3.0"
+# Aquí van las dependencias que el código NECESITA para ejecutarse
+dependencies = [
+    # Ej: "requests>=2.28.0"
+]
+
+[project.optional-dependencies]
+# Aquí van las dependencias de desarrollo (como pytest)
+test = [
+    "pytest",
+    "pytest-cov"
+]
+dev = [
+    "flake8",
+    "black",
+    "build"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = "E203"
