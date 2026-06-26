@@ -29,6 +29,3 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["test"]
 
-[tool.flake8]
-max-line-length = 88
-extend-ignore = "E203"
