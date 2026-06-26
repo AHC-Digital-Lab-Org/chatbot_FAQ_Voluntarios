@@ -1,0 +1,12 @@
+# Paleta oficial AHC — Guía de Marca 2026
+[theme]
+primaryColor = "#4F9447"
+backgroundColor = "#F4F1E9"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#222A1A"
+font = "sans serif"
+
+[client]
+# Oculta el botón "Deploy" y el menú de hamburguesa de Streamlit
+# (la app sigue funcionando exactamente igual).
+toolbarMode = "minimal"

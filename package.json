@@ -1,7 +1,7 @@
 {
-  "name": "python-template",
+  "name": "chatbot-faq-voluntarios",
   "version": "1.0.0",
-  "description": "Template de Python compatible con el pipeline universal de Ops",
+  "description": "Chatbot FAQ para voluntarios de la AHC (Streamlit + Gemini), compatible con el pipeline de Ops",
   "scripts": {
     "test": "pytest",
     "build": "python -m build",

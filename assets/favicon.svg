@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AHC">
+  <title>AHC</title>
+  <rect width="64" height="64" rx="12" fill="#4F9447"/>
+  <text x="32" y="44" text-anchor="middle"
+        font-family="'Source Sans 3','Source Sans Pro',Arial,sans-serif"
+        font-weight="800" font-size="28" fill="#FFFFFF" letter-spacing="1">AHC</text>
+</svg>

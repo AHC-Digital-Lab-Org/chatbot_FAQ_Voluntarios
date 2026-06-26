@@ -3,14 +3,15 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "python-template"
+name = "chatbot-faq-voluntarios"
 version = "1.0.0"
-description = "Template de Python compatible con el pipeline universal de Ops"
+description = "Chatbot FAQ para voluntarios de la Asociación Huella de Carbono (Streamlit + Gemini)"
 readme = "README.md"
-requires-python = ">=3.0"
-# Aquí van las dependencias que el código NECESITA para ejecutarse
+requires-python = ">=3.10"
+# Dependencias que la app NECESITA para ejecutarse (también en requirements.txt para Streamlit Cloud)
 dependencies = [
-    # Ej: "requests>=2.28.0"
+    "streamlit>=1.40.0",
+    "google-genai>=2.8.0",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +27,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["test"]
 
 [tool.flake8]
 max-line-length = 88

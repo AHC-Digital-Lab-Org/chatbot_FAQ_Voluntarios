@@ -1,2 +1,43 @@
-node_modules/
+# ── Secrets — NUNCA subir al repositorio ──────────────────────────────────────
+.streamlit/secrets.toml
+*.env
+.env
+.env.*
+!.env.example
+
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+.python-version
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Streamlit cache ───────────────────────────────────────────────────────────
+.streamlit/cache/
+
+# ── Editores e IDE ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── macOS / Windows / Linux ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+node_modules/
