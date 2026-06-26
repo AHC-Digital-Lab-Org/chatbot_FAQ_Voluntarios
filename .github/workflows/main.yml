@@ -8,9 +8,9 @@ on:
 
 jobs:
   call-ops-workflow:
-    # Sustituye 'tu-usuario' por el nombre de tu cuenta o asociación en GitHub
-    uses: OrganizacionDePruebaTest/asociacion-ops/.github/workflows/streamlit-reusable.yml@main
+    # Workflow reutilizable central de la organización (asociacion-ops).
+    uses: AHC-Digital-Lab-Org/asociacion-ops/.github/workflows/streamlit-reusable.yml@main
     with:
       language: 'python'
       python_version: '3.13.11'
-    secrets: inherit # Pasa los tokens de Netlify automáticamente
+    secrets: inherit
