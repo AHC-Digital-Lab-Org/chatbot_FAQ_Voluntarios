@@ -33,7 +33,16 @@ def _inline_svg(path: pathlib.Path) -> str:
 
 LOGO_SVG = _inline_svg(ASSETS_DIR / "logo_ahc.svg")
 
-GEMINI_MODEL = "gemini-3.1-flash-lite"
+def _get_secret(name: str):
+    """Lee un secreto de Streamlit sin reventar si aún no se ha configurado."""
+    try:
+        return st.secrets[name]
+    except Exception:
+        return None
+
+
+# Modelo por defecto; el admin puede sobreescribirlo añadiendo GEMINI_MODEL en los Secrets.
+GEMINI_MODEL = _get_secret("GEMINI_MODEL") or "gemini-3.1-flash-lite"
 
 # ── Configuración Streamlit ────────────────────────────────────────────────────
 
@@ -164,8 +173,28 @@ st.markdown(
 
 # ── Estado de sesión ────────────────────────────────────────────────────────────
 
+# Si el administrador todavía no ha cargado la clave de la API en Streamlit Cloud,
+# mostramos un aviso amable en lugar de que la app reviente con "Error running your app".
+if _get_secret("GEMINI_API_KEY") is None:
+    st.info(
+        "⏳ **El asistente está casi listo.**\n\n"
+        "El administrador todavía debe configurar la clave de la API "
+        "(`GEMINI_API_KEY`) en los *Secrets* de Streamlit Cloud "
+        "(Manage app → Settings → Secrets). En cuanto esté, el chat "
+        "funcionará automáticamente."
+    )
+    st.stop()
+
 if "chat" not in st.session_state:
-    st.session_state.chat = new_chat_session()
+    try:
+        st.session_state.chat = new_chat_session()
+    except Exception as e:
+        st.error(
+            "No se pudo inicializar el asistente. Revisa que la clave de la API "
+            f"sea válida y que el modelo `{GEMINI_MODEL}` exista.\n\n"
+            f"```\n{e}\n```"
+        )
+        st.stop()
 
 # ── Historial de chat ──────────────────────────────────────────────────────────
 
