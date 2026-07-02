@@ -36,6 +36,7 @@ def test_app_renders_welcome_and_chat_when_configured() -> None:
     assert len(app.chat_input) == 1
     assert app.chat_input[0].placeholder == "Escribe tu duda sobre la AHC..."
     assert len(app.chat_message) == 1
+    assert any("ahc-welcome" in element.value for element in app.markdown)
     button_labels = {button.label for button in app.button}
     assert {
         "Nueva conversación",

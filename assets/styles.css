@@ -123,6 +123,14 @@ html, body, [class*="css"] {
     margin-bottom: 0;
 }
 
+[data-testid="stChatMessage"]:has(.ahc-welcome) {
+    align-items: center;
+}
+
+.ahc-welcome {
+    line-height: 1.55;
+}
+
 [data-testid="stChatInput"] {
     background: rgba(244, 241, 233, 0.9);
     backdrop-filter: blur(12px);

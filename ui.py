@@ -79,8 +79,10 @@ def render_welcome() -> str | None:
     """Orienta al voluntario y devuelve una consulta sugerida si se pulsa."""
     with st.chat_message("assistant", avatar=BOT_AVATAR_PATH):
         st.markdown(
-            "Hola, soy el asistente para voluntarios de la AHC. Puedo ayudarte "
-            "con información incluida en nuestra base interna."
+            '<div class="ahc-welcome">Hola, soy el asistente para voluntarios '
+            "de la AHC. Puedo ayudarte con información incluida en nuestra "
+            "base interna.</div>",
+            unsafe_allow_html=True,
         )
 
     st.caption("Consultas frecuentes")
