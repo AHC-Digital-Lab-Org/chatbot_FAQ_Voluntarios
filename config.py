@@ -9,7 +9,7 @@ ASSETS_DIR = BASE_DIR / "assets"
 DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite"
 
 FAVICON_PATH = str(ASSETS_DIR / "favicon-192.png")
-BOT_AVATAR_PATH = FAVICON_PATH
+BOT_AVATAR_PATH = str(ASSETS_DIR / "bot_avatar.png")
 OFFICIAL_LOGO_PATH = ASSETS_DIR / "logo_ahc_oficial.jpg"
 
 

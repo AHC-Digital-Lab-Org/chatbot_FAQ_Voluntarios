@@ -9,6 +9,7 @@ from config import BOT_AVATAR_PATH, DEFAULT_GEMINI_MODEL, load_system_prompt
 from gemini_service import GeminiService, content_text, response_text
 from ui import (
     configure_page,
+    render_chat_toolbar,
     render_error,
     render_footer,
     render_header,
@@ -85,8 +86,13 @@ if "chat" not in st.session_state:
 
 
 history = st.session_state.chat.get_history()
+if render_chat_toolbar(has_history=bool(history)):
+    st.session_state.pop("chat", None)
+    st.rerun()
+
+suggested_prompt = None
 if not history:
-    render_welcome()
+    suggested_prompt = render_welcome()
 
 for content in history:
     role = "user" if content.role == "user" else "assistant"
@@ -96,10 +102,11 @@ for content in history:
 
 # ── Captura nueva pregunta ─────────────────────────────────────────────────────
 
-if prompt := st.chat_input(
+typed_prompt = st.chat_input(
     "Escribe tu duda sobre la AHC...",
     max_chars=MAX_PROMPT_CHARS,
-):
+)
+if prompt := typed_prompt or suggested_prompt:
     try:
         prompt = normalize_prompt(prompt)
     except ValueError as error:

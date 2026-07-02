@@ -10,6 +10,13 @@ from config import (
     load_styles,
 )
 
+SUGGESTED_PROMPTS = (
+    ("Acceso al Campus", "He olvidado mi contraseña del Campus, ¿qué debo hacer?"),
+    ("Qué es un EcoGesto", "¿Qué es un EcoGesto?"),
+    ("Registro MITECO", "¿Cómo funciona el registro MITECO?"),
+    ("Roles de voluntariado", "¿Qué roles de voluntariado existen en la AHC?"),
+)
+
 
 def configure_page() -> None:
     """Configura la página e instala los estilos AHC."""
@@ -30,10 +37,11 @@ def render_header() -> None:
         'alt="Asociación Huella de Carbono">'
         '<div class="ahc-title-block">'
         '<p class="ahc-eyebrow">Espacio de apoyo al voluntariado</p>'
-        '<h1 class="ahc-title">Asistente para voluntarios</h1>'
+        '<div class="ahc-title" role="heading" aria-level="1">'
+        "Asistente para voluntarios</div>"
         '<p class="ahc-tagline">Campus, EcoGestos y procedimientos</p>'
+        '<div class="ahc-status"><span></span>Base de conocimiento AHC</div>'
         "</div>"
-        '<div class="ahc-status"><span></span>Base AHC</div>'
         "</header>",
         unsafe_allow_html=True,
     )
@@ -52,6 +60,8 @@ def render_sidebar(api_configured: bool) -> bool:
             "Nueva conversación",
             use_container_width=True,
             disabled=not api_configured,
+            type="primary",
+            key="reset_chat_sidebar",
         )
         st.markdown("### Uso responsable")
         st.caption(
@@ -65,20 +75,36 @@ def render_sidebar(api_configured: bool) -> bool:
     return reset_requested
 
 
-def render_welcome() -> None:
-    """Orienta al voluntario antes de su primera pregunta."""
+def render_welcome() -> str | None:
+    """Orienta al voluntario y devuelve una consulta sugerida si se pulsa."""
     with st.chat_message("assistant", avatar=BOT_AVATAR_PATH):
         st.markdown(
             "Hola, soy el asistente para voluntarios de la AHC. Puedo ayudarte "
             "con información incluida en nuestra base interna."
         )
-        st.markdown(
-            '<div class="ahc-topics" aria-label="Temas disponibles">'
-            "<span>Campus</span><span>EcoGestos</span><span>MITECO</span>"
-            "<span>Voluntariado</span></div>",
-            unsafe_allow_html=True,
+
+    st.caption("Consultas frecuentes")
+    columns = st.columns(2)
+    for index, (label, prompt) in enumerate(SUGGESTED_PROMPTS):
+        with columns[index % 2]:
+            if st.button(label, key=f"suggestion_{index}", use_container_width=True):
+                return prompt
+    return None
+
+
+def render_chat_toolbar(has_history: bool) -> bool:
+    """Ofrece un reinicio visible cuando ya existe conversación."""
+    if not has_history:
+        return False
+
+    _, action_column = st.columns([3, 1])
+    with action_column:
+        return st.button(
+            "Nueva conversación",
+            type="primary",
+            use_container_width=True,
+            key="reset_chat_main",
         )
-        st.caption("Prueba con: «¿Cómo recupero mi contraseña del Campus?»")
 
 
 def render_error(details: ErrorDetails) -> None:

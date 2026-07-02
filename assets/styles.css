@@ -37,11 +37,11 @@ html, body, [class*="css"] {
 .ahc-header {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(210px, 280px) 1fr;
     align-items: center;
-    gap: 24px;
-    margin-bottom: 28px;
-    padding: 22px 24px;
+    gap: 28px;
+    margin-bottom: 20px;
+    padding: 20px 24px;
     overflow: hidden;
     background: rgba(255, 254, 249, 0.9);
     border: 1px solid var(--ahc-line);
@@ -50,30 +50,17 @@ html, body, [class*="css"] {
     animation: ahc-enter 420ms ease-out both;
 }
 
-.ahc-header::after {
-    content: "";
-    position: absolute;
-    right: -45px;
-    bottom: -70px;
-    width: 170px;
-    height: 170px;
-    border: 30px solid rgba(79, 148, 71, 0.07);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
 .ahc-logo {
-    width: 100%;
-    max-width: 460px;
+    display: block;
+    width: min(100%, 280px) !important;
+    max-width: 280px !important;
     height: auto;
+    object-fit: contain;
     mix-blend-mode: multiply;
 }
 
 .ahc-title-block {
-    grid-column: 1 / -1;
     min-width: 0;
-    padding-top: 16px;
-    border-top: 1px solid var(--ahc-line);
 }
 
 .ahc-eyebrow {
@@ -89,7 +76,7 @@ html, body, [class*="css"] {
     margin: 0;
     color: var(--ahc-forest);
     font-family: "Fraunces", serif;
-    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-size: clamp(1.45rem, 2.8vw, 2rem);
     font-weight: 600;
     line-height: 1.05;
 }
@@ -101,10 +88,11 @@ html, body, [class*="css"] {
 }
 
 .ahc-status {
-    z-index: 1;
     display: inline-flex;
     align-items: center;
+    width: fit-content;
     gap: 7px;
+    margin-top: 12px;
     padding: 7px 10px;
     white-space: nowrap;
     color: var(--ahc-forest);
@@ -135,23 +123,6 @@ html, body, [class*="css"] {
     margin-bottom: 0;
 }
 
-.ahc-topics {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 12px 0 10px;
-}
-
-.ahc-topics span {
-    padding: 5px 10px;
-    color: var(--ahc-forest);
-    background: rgba(165, 198, 164, 0.2);
-    border: 1px solid rgba(79, 148, 71, 0.18);
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 500;
-}
-
 [data-testid="stChatInput"] {
     background: rgba(244, 241, 233, 0.9);
     backdrop-filter: blur(12px);
@@ -168,7 +139,7 @@ html, body, [class*="css"] {
     box-shadow: 0 0 0 3px rgba(79, 148, 71, 0.14);
 }
 
-.stButton > button {
+[data-testid="stBaseButton-primary"] {
     min-height: 42px;
     color: white;
     background: var(--ahc-forest);
@@ -177,9 +148,24 @@ html, body, [class*="css"] {
     font-weight: 600;
 }
 
-.stButton > button:hover {
+[data-testid="stBaseButton-primary"]:hover {
     color: white;
     background: #193b25;
+}
+
+[data-testid="stBaseButton-secondary"] {
+    min-height: 42px;
+    color: var(--ahc-forest);
+    background: rgba(255, 254, 249, 0.86);
+    border: 1px solid rgba(79, 148, 71, 0.24);
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+[data-testid="stBaseButton-secondary"]:hover {
+    color: #193b25;
+    background: rgba(165, 198, 164, 0.18);
+    border-color: var(--ahc-green);
 }
 
 .stButton > button:focus-visible,
@@ -226,21 +212,14 @@ textarea:focus-visible {
 
     .ahc-header {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 14px;
         padding: 18px;
         border-radius: 18px;
     }
 
-    .ahc-status {
-        display: none;
-    }
-
     .ahc-logo {
-        max-width: 360px;
-    }
-
-    .ahc-title-block {
-        grid-column: 1;
+        width: min(100%, 260px) !important;
+        max-width: 260px !important;
     }
 
     .ahc-eyebrow {

@@ -102,6 +102,7 @@ voluntario.
 │   ├── config.toml                 paleta de colores AHC para Streamlit
 │   └── secrets.toml.example        plantilla para la API key
 └── assets/
+    ├── bot_avatar.png              avatar optimizado del asistente
     ├── logo_ahc_oficial.jpg        logotipo oficial usado en cabecera
     ├── logo_ahc.svg                recurso vectorial auxiliar
     ├── favicon.svg                 favicon vectorial
