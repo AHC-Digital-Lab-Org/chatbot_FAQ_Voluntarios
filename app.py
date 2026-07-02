@@ -1,262 +1,131 @@
-import pathlib
+import logging
 
 import streamlit as st
-from google import genai
-from google.genai import types
 from google.genai.errors import APIError
+from streamlit.errors import StreamlitSecretNotFoundError
+
+from chat_logic import MAX_PROMPT_CHARS, error_details, normalize_prompt
+from config import BOT_AVATAR_PATH, DEFAULT_GEMINI_MODEL, load_system_prompt
+from gemini_service import GeminiService, content_text, response_text
+from ui import (
+    configure_page,
+    render_error,
+    render_footer,
+    render_header,
+    render_sidebar,
+    render_welcome,
+)
+
+LOGGER = logging.getLogger(__name__)
+configure_page()  # Debe ser la primera llamada de Streamlit.
 
 # ── Constantes de marca AHC ────────────────────────────────────────────────────
 
-BASE_DIR = pathlib.Path(__file__).parent
-ASSETS_DIR = BASE_DIR / "assets"
 
-AHC_GREEN = "#4F9447"
-AHC_TITLE_GREEN = "#537358"
-AHC_TEXT = "#222A1A"
-AHC_LINK = "#A5C6A4"
-AHC_BG_LIGHT = "#F4F1E9"
-
-FAVICON_PATH = str(ASSETS_DIR / "favicon-192.png")
-BOT_AVATAR_PATH = str(ASSETS_DIR / "favicon-192.png")
-
-def _inline_svg(path: pathlib.Path) -> str:
-    """Lee un SVG y prepara su markup para inyectarlo dentro de HTML.
-
-    Streamlit/Markdown rompe el HTML siguiente si la cadena contiene
-    una declaración XML (`<?xml ...?>`); también quitamos los saltos
-    de línea iniciales para que no se interpreten como párrafo.
-    """
-    raw = path.read_text(encoding="utf-8")
-    if raw.startswith("<?xml"):
-        raw = raw.split("?>", 1)[1]
-    return raw.strip()
-
-LOGO_SVG = _inline_svg(ASSETS_DIR / "logo_ahc.svg")
-
-def _get_secret(name: str):
+def _get_secret(name: str) -> str | None:
     """Lee un secreto de Streamlit sin reventar si aún no se ha configurado."""
     try:
-        return st.secrets[name]
-    except Exception:
+        value = st.secrets.get(name)
+    except StreamlitSecretNotFoundError:
         return None
+    return str(value) if value else None
 
 
-# Modelo por defecto; el admin puede sobreescribirlo añadiendo GEMINI_MODEL en los Secrets.
-GEMINI_MODEL = _get_secret("GEMINI_MODEL") or "gemini-3.1-flash-lite"
+# El administrador puede sobrescribir el modelo mediante Streamlit Secrets.
+GEMINI_MODEL = _get_secret("GEMINI_MODEL") or DEFAULT_GEMINI_MODEL
 
 # ── Configuración Streamlit ────────────────────────────────────────────────────
 
-st.set_page_config(
-    page_title="Asistente AHC para Voluntarios",
-    page_icon=FAVICON_PATH,
-    layout="centered",
-)
-
 # ── Cliente Gemini ──────────────────────────────────────────────────────────────
 
-@st.cache_resource
-def get_client() -> genai.Client:
-    return genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-
 
 @st.cache_resource
-def load_system_prompt() -> str:
-    return (BASE_DIR / "system_prompt.md").read_text(encoding="utf-8")
-
-
-def new_chat_session():
-    return get_client().chats.create(
-        model=GEMINI_MODEL,
-        config=types.GenerateContentConfig(
-            system_instruction=load_system_prompt(),
-        ),
+def get_gemini_service(api_key: str, model: str) -> GeminiService:
+    return GeminiService(
+        api_key=api_key,
+        model=model,
+        system_instruction=load_system_prompt(),
     )
-
-
-def list_available_models() -> list[str]:
-    """Modelos disponibles con tu API key. Útil para depurar 404."""
-    return [
-        m.name
-        for m in get_client().models.list()
-        if m.supported_actions and "generateContent" in m.supported_actions
-    ]
 
 
 # ── Estilo personalizado AHC ───────────────────────────────────────────────────
 
-st.markdown(
-    f"""
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&family=Source+Sans+3:wght@600;700&display=swap');
-
-        html, body {{
-            font-family: 'Nunito Sans', sans-serif;
-            color: {AHC_TEXT};
-        }}
-
-        .stApp h1, .stApp h2, .stApp h3 {{
-            font-family: 'Source Sans 3', sans-serif;
-            color: {AHC_TITLE_GREEN};
-        }}
-
-        .stChatInput textarea {{
-            border-color: {AHC_GREEN} !important;
-        }}
-
-        .stApp a {{
-            color: {AHC_GREEN};
-        }}
-
-        .ahc-header {{
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 12px 0 20px 0;
-            border-bottom: 2px solid {AHC_GREEN};
-            margin-bottom: 20px;
-        }}
-
-        .ahc-header svg {{
-            width: 240px;
-            max-width: 40%;
-            height: auto;
-            flex-shrink: 0;
-        }}
-
-        .ahc-header .ahc-title-block .ahc-title {{
-            margin: 0;
-            font-family: 'Source Sans 3', sans-serif;
-            font-weight: 700;
-            font-size: 22px;
-            line-height: 1.2;
-            color: {AHC_TITLE_GREEN};
-        }}
-
-        .ahc-header .ahc-title-block .ahc-tagline {{
-            margin: 4px 0 0 0;
-            font-size: 13px;
-            color: {AHC_TEXT};
-            opacity: 0.7;
-        }}
-
-        /* Reserva espacio al final para que el footer no quede tapado
-           por el st.chat_input (position: fixed). */
-        .ahc-footer {{
-            margin: 32px 0 120px 0;
-            padding-top: 16px;
-            border-top: 1px solid {AHC_LINK};
-            text-align: center;
-            font-size: 12px;
-            color: {AHC_TEXT};
-            opacity: 0.6;
-        }}
-
-        .ahc-footer a {{
-            color: {AHC_GREEN};
-        }}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+render_header()
 
 # ── Cabecera con logo AHC ──────────────────────────────────────────────────────
-
-st.markdown(
-    f'<div class="ahc-header">{LOGO_SVG}'
-    '<div class="ahc-title-block">'
-    '<div class="ahc-title">Asistente para Voluntarios</div>'
-    '<div class="ahc-tagline">Resuelvo dudas sobre el Campus, EcoGestos '
-    "y procedimientos de la AHC</div>"
-    "</div></div>",
-    unsafe_allow_html=True,
-)
 
 # ── Estado de sesión ────────────────────────────────────────────────────────────
 
 # Si el administrador todavía no ha cargado la clave de la API en Streamlit Cloud,
-# mostramos un aviso amable en lugar de que la app reviente con "Error running your app".
-if _get_secret("GEMINI_API_KEY") is None:
+# mostramos un aviso en lugar de que la app termine con un error genérico.
+api_key = _get_secret("GEMINI_API_KEY")
+if render_sidebar(api_configured=api_key is not None):
+    st.session_state.pop("chat", None)
+    st.rerun()
+
+if api_key is None:
     st.info(
         "⏳ **El asistente está casi listo.**\n\n"
-        "El administrador todavía debe configurar la clave de la API "
-        "(`GEMINI_API_KEY`) en los *Secrets* de Streamlit Cloud "
-        "(Manage app → Settings → Secrets). En cuanto esté, el chat "
-        "funcionará automáticamente."
+        "La persona administradora debe completar la configuración del servicio."
     )
     st.stop()
 
 if "chat" not in st.session_state:
     try:
-        st.session_state.chat = new_chat_session()
-    except Exception as e:
+        st.session_state.chat = get_gemini_service(api_key, GEMINI_MODEL).new_chat()
+    except Exception:
+        LOGGER.exception("No se pudo inicializar el cliente de Gemini")
         st.error(
-            "No se pudo inicializar el asistente. Revisa que la clave de la API "
-            f"sea válida y que el modelo `{GEMINI_MODEL}` exista.\n\n"
-            f"```\n{e}\n```"
+            "No se pudo iniciar el asistente. Contacta con la persona "
+            "administradora para revisar la configuración."
         )
         st.stop()
 
 # ── Historial de chat ──────────────────────────────────────────────────────────
 
 
-def _content_text(content) -> str:
-    """Extrae el texto plano de un Content del SDK (parts puede tener varios)."""
-    return "".join(getattr(part, "text", "") or "" for part in content.parts)
+history = st.session_state.chat.get_history()
+if not history:
+    render_welcome()
 
-
-for content in st.session_state.chat.get_history():
+for content in history:
     role = "user" if content.role == "user" else "assistant"
     avatar = BOT_AVATAR_PATH if role == "assistant" else None
     with st.chat_message(role, avatar=avatar):
-        st.markdown(_content_text(content))
+        st.markdown(content_text(content))
 
 # ── Captura nueva pregunta ─────────────────────────────────────────────────────
 
-if prompt := st.chat_input("Escribe tu duda aquí..."):
+if prompt := st.chat_input(
+    "Escribe tu duda sobre la AHC...",
+    max_chars=MAX_PROMPT_CHARS,
+):
+    try:
+        prompt = normalize_prompt(prompt)
+    except ValueError as error:
+        st.warning(str(error))
+        st.stop()
+
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant", avatar=BOT_AVATAR_PATH):
-        with st.spinner("Pensando..."):
-            try:
-                response = st.session_state.chat.send_message(prompt)
-                st.markdown(response.text)
-            except APIError as e:
-                status = getattr(e, "code", None) or getattr(e, "status_code", None)
-                if status == 429:
-                    st.warning(
-                        "Estoy procesando demasiadas consultas en este momento "
-                        "(límite de la capa gratuita de Gemini: 15 peticiones/minuto). "
-                        "Por favor, inténtalo de nuevo en 1 minuto."
-                    )
-                elif status == 403:
-                    st.error(
-                        "La API de Google ha rechazado la petición "
-                        "(`403 PERMISSION_DENIED`). El proyecto Google asociado a la API key "
-                        "está bloqueado. Crea una API key nueva en un proyecto nuevo en "
-                        "https://aistudio.google.com/apikey y actualiza "
-                        "`.streamlit/secrets.toml`."
-                    )
-                    try:
-                        st.caption("Modelos disponibles con tu key actual:")
-                        st.code("\n".join(list_available_models()) or "ninguno")
-                    except Exception as e2:
-                        st.code(f"No se pudo listar modelos: {e2}")
-                else:
-                    st.error(
-                        f"Error de la API de Gemini al consultar `{GEMINI_MODEL}`:\n\n"
-                        f"```\n{e}\n```"
-                    )
-            except Exception as e:
-                st.error(f"Error inesperado:\n\n```\n{e}\n```")
+    with (
+        st.chat_message("assistant", avatar=BOT_AVATAR_PATH),
+        st.spinner("Pensando..."),
+    ):
+        try:
+            response = st.session_state.chat.send_message(prompt)
+            st.markdown(response_text(response))
+        except APIError as error:
+            LOGGER.warning("Gemini rechazó una consulta", exc_info=True)
+            render_error(error_details(error))
+        except ValueError:
+            LOGGER.warning("Gemini devolvió una respuesta vacía", exc_info=True)
+            st.error("No he recibido una respuesta válida. Inténtalo de nuevo.")
+        except Exception:
+            LOGGER.exception("Fallo inesperado al consultar Gemini")
+            st.error("Se produjo un error inesperado. Inténtalo de nuevo más tarde.")
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 
-st.markdown(
-    '<div class="ahc-footer">'
-    "Para consultas no cubiertas: "
-    '<a href="mailto:secretaria@asociacionhuelladecarbono.org">'
-    "secretaria@asociacionhuelladecarbono.org</a>"
-    "</div>",
-    unsafe_allow_html=True,
-)
+render_footer()
